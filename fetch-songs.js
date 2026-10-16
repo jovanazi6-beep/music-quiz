@@ -1,23 +1,19 @@
 const { createClient } = require('@supabase/supabase-js');
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 const SUPABASE_URL = 'https://wsxnbjmffbrfwhovtrla.supabase.co';
 const supabase = createClient(SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 async function fetchSongsFromSpotify() {
-    // 1. Prijava na Spotify sa URLSearchParams
-    const params = new URLSearchParams();
-    params.append('grant_type', 'client_credentials');
-
     const credentials = Buffer.from(process.env.SPOTIFY_CLIENT_ID + ':' + process.env.SPOTIFY_CLIENT_SECRET).toString('base64');
 
+    // 1. Dobijanje Spotify tokena
     const tokenRes = await fetch('https://accounts.spotify.com/api/token', {
         method: 'POST',
         headers: {
             'Authorization': 'Basic ' + credentials,
             'Content-Type': 'application/x-www-form-urlencoded'
         },
-        body: params
+        body: 'grant_type=client_credentials'
     });
 
     const tokenData = await tokenRes.json();
@@ -31,7 +27,7 @@ async function fetchSongsFromSpotify() {
     const searchQueries = ['rock', 'pop', 'metal', 'hits', '80s', '90s', 'dance', 'indie', 'hip hop'];
     const randomQuery = searchQueries[Math.floor(Math.random() * searchQueries.length)];
     
-    const res = await fetch(`https://api.spotify.com/v1/search?q=${randomQuery}&type=track&limit=20`, {
+    const res = await fetch(`https://api.spotify.com/v1/search?q=${randomQuery}&type=track&limit=30`, {
         headers: { 'Authorization': 'Bearer ' + token }
     });
     
