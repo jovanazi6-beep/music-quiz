@@ -1,7 +1,9 @@
 const { createClient } = require('@supabase/supabase-js');
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+// Direktno upisan URL da eliminišemo grešku sa tajnama
+const SUPABASE_URL = 'https://wsxnbjmffbrfwhovtrla.supabase.co';
+const supabase = createClient(SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 async function getSpotifyAccessToken() {
     const response = await fetch('https://accounts.spotify.com/api/token', {
@@ -41,8 +43,12 @@ async function fetchSongsFromSpotify() {
     }
 
     if (tracksToInsert.length > 0) {
-        await supabase.from('songs').insert(tracksToInsert);
-        console.log(`Dodato ${tracksToInsert.length} pesama!`);
+        const { error } = await supabase.from('songs').insert(tracksToInsert);
+        if (error) {
+            console.error('Greška pri upisu:', error);
+        } else {
+            console.log(`Uspešno dodato ${tracksToInsert.length} pesama!`);
+        }
     }
 }
 
